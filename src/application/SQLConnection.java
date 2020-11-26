@@ -4,13 +4,14 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
-
+import org.sqlite.SQLiteDataSource;
 import javafx.beans.property.SimpleListProperty;
 
 public class SQLConnection {
-	
-	public Connection conn = null;
+
+	public SQLiteDataSource ds = null;
 	public static PreparedStatement pst = null;
 	public static ResultSet rs = null;
 	private SimpleListProperty<Row> rowListProperty;
@@ -25,16 +26,31 @@ public class SQLConnection {
 	}
 	
 	public Connection getConnection() {
+		Connection conn = null;
 		try {
-			conn = null;
-			//EXPERIMENTAL
-			//Class.forName("org.sqlite.JDBC");
-			//conn = DriverManager.getConnection("jdbc:sqlite::resource:file:Library/ListView.db");
+			
+	        try {
+	            ds = new SQLiteDataSource();
+	            ds.setUrl("jdbc:sqlite:appDB.db");
+	        } catch ( Exception e ) {
+	            e.printStackTrace();
+	            System.exit(0);
+	        }
+	        
+	        System.out.println( "Opened database successfully" );
 
-			//WORKING
-			Class.forName("org.sqlite.JDBC");
-			conn = DriverManager.getConnection("jdbc:sqlite:ListView.db");
-			return conn;
+	        
+	        
+	        try{
+	        	conn = ds.getConnection();
+	        } catch ( SQLException e ) {
+	            e.printStackTrace();
+	            System.exit( 0 );
+	        }
+
+	        System.out.println( "Created database successfully" );
+
+	        return conn;
 		}catch(Exception e) {
 			e.getStackTrace();
 			return null;
@@ -50,10 +66,12 @@ public class SQLConnection {
 	}
 	
 	public void populateFromTableName() {
+		Connection conn =  null;
+		
 		try {
 			rowListProperty = Main.model.rowListProperty();
 			String query = "select * from TABLE";
-			Connection conn = getConnection();
+			conn = getConnection();
 			Statement statement = conn.createStatement();
 			ResultSet rs = statement.executeQuery(query);
 //			while(rs.next()){
@@ -78,27 +96,58 @@ public class SQLConnection {
 	}
 	
 	public void init() throws ClassNotFoundException {
-		//getConnection();
-		//initTableA();
+		getConnection();
+		
+		initTable();
+		
+		insertToTable();
 		//initTableB();
 		//initTableC();
 	}
 	
 	public void initTable() {
-//		try {
-//			String query = "CREATE TABLE IF NOT EXISTS tableName(" +
-//						"  primary_key INTEGER PRIMARY KEY," +
-//						"  type VARCHAR(25) NOT NULL, name VARCHAR(25) NOT NULL" +
-//						");";
-//			
-//			Connection conn = getConnection();
-//			Statement statement = conn.createStatement();
-//			statement.executeUpdate(query);
-//			conn.close();
-//		}catch(Exception e) {
-//			System.out.println("CREATE TABLE FAILED" + "\n\tconn = " + conn);
-//			e.printStackTrace();
-//		}
+		Connection conn = null;
+		
+		try {
+			String query = "CREATE TABLE IF NOT EXISTS Test(" +
+						"  primary_key INTEGER PRIMARY KEY," +
+						"  type VARCHAR(25) NOT NULL, name VARCHAR(25) NOT NULL" +
+						");";
+			
+			conn = getConnection();
+			Statement statement = conn.createStatement();
+			statement.executeUpdate(query);
+			conn.close();
+		}catch(Exception e) {
+			System.out.println("CREATE TABLE FAILED" + "\n\tconn = " + conn);
+			e.printStackTrace();
+		}
+	}
+	
+	public void insertToTable() {
+		Connection conn = null;
+		String type = "VALUE";
+		String name = "STUFF";
+		
+		try {
+			String query = "INSERT INTO Test(type , name)" +
+					"  VALUES('" + type + "', '" + name + "')";
+			
+			conn = getConnection();
+			Statement statement = conn.createStatement();
+			statement.executeUpdate(query);
+			
+			query = "select * from Test WHERE type='"+ type +"' AND "
+					+ "name='" + name + "';";
+			ResultSet rs = statement.executeQuery(query);
+			while(rs.next())
+				System.out.println("The Row: " + rs.getInt("primary_key") + rs.getString("type") + rs.getString("name"));
+			
+			conn.close();
+		}catch(Exception e) {
+			System.out.println("CREATE TABLE FAILED" + "\n\tconn = " + conn);
+			e.printStackTrace();
+		}
 	}
 
 }
