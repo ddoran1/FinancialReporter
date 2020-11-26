@@ -97,10 +97,10 @@ public class SQLConnection {
 	
 	public void init() throws ClassNotFoundException {
 		getConnection();
-		
+		clearDB();
 		initTable();
-		
 		insertToTable();
+		
 		//initTableB();
 		//initTableC();
 	}
@@ -146,6 +146,22 @@ public class SQLConnection {
 			conn.close();
 		}catch(Exception e) {
 			System.out.println("CREATE TABLE FAILED" + "\n\tconn = " + conn);
+			e.printStackTrace();
+		}
+	}
+	
+	public void clearDB() {
+		Connection conn = null;
+		
+		try {
+			String query = "DROP TABLE IF EXISTS Test;";
+			conn = getConnection();
+			Statement statement = conn.createStatement();
+			statement.executeUpdate(query);
+
+			conn.close();
+		}catch(Exception e) {
+			System.out.println("DROP TABLE(S) FAILED" + "\n\tconn = " + conn);
 			e.printStackTrace();
 		}
 	}
