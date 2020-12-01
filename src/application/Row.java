@@ -8,17 +8,17 @@ public class Row {
 	}
 
 	//Expenses
-	public Row(int temp_PK, String name, int expense, String description, String datePaid, String dateAcquired) {
+	public Row(int temp_PK, String name, double expense, String description, String datePaid, String dateAcquired) {
 		// TODO Auto-generated constructor stub
 	}
 	
 	//Earnings
-	public Row(int temp_PK, String name, int earning, String description, String dateIn) {
+	public Row(int temp_PK, String name, double earning, String description, String dateIn) {
 		// TODO Auto-generated constructor stub
 	}
 
 	//Debts
-	public Row(int temp_PK, String name, int debtTotal, int debtPaid, String description, String dateIn) {
+	public Row(int temp_PK, String name, double debtTotal, int debtPaid, String description, String dateIn) {
 		// TODO Auto-generated constructor stub
 	}
 	

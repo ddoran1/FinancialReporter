@@ -58,11 +58,11 @@ public class SQLConnection {
 	}
 
 	public void populate() {
-		/*
-		 * A method that will populate the fields after drawing from the DB
-		 * 
-		 * this.populateFromTableName();
-		 */
+		double amt = 75.56;
+		//DATE FORMAT  ===>>>  YYYY-MM-DD
+		insertIntoExpenses("Phone", amt, "Verizon cell service", "2020-11-30", "2020-11-28");
+		amt = 75500.78;
+		insertIntoExpenses("Tesla", amt, "Verizon cell service", "2020-11-30", "2020-11-28");
 	}
 	
 	public void populateFromTableName() {
@@ -98,21 +98,22 @@ public class SQLConnection {
 	public void init() throws ClassNotFoundException {
 		getConnection();
 		clearDB();
-		initTable();
-		insertToTable();
+		initExpenses();
+		populate();
+		viewExpensesTable();
 		
 		//initTableB();
 		//initTableC();
 	}
 	
-	public void initTable() {
+	public void initExpenses() {
 		Connection conn = null;
-		
+		//String name, int expense, String description, String datePaid, String dateAcquired
 		try {
-			String query = "CREATE TABLE IF NOT EXISTS Test(" +
+			String query = "CREATE TABLE IF NOT EXISTS Expenses(" +
 						"  primary_key INTEGER PRIMARY KEY," +
-						"  type VARCHAR(25) NOT NULL, name VARCHAR(25) NOT NULL" +
-						");";
+						"  name VARCHAR(25) NOT NULL, expense REAL NOT NULL," +
+						"  description VARCHAR(25) NOT NULL, datePaid TEXT, dateAcquired TEXT);";
 			
 			conn = getConnection();
 			Statement statement = conn.createStatement();
@@ -124,28 +125,61 @@ public class SQLConnection {
 		}
 	}
 	
-	public void insertToTable() {
+	public void insertIntoExpenses(String name, double expense, String description, String datePaid, String dateAcquired) {
 		Connection conn = null;
-		String type = "VALUE";
-		String name = "STUFF";
 		
 		try {
-			String query = "INSERT INTO Test(type , name)" +
-					"  VALUES('" + type + "', '" + name + "')";
+			String query = "INSERT INTO Expenses(name , expense, description, datePaid, dateAcquired)" +
+					"  VALUES('" + name + "', '" + expense + "', '" + description + "', '" + datePaid + "', '" + dateAcquired + "')";
+			
+			conn = getConnection();
+			Statement statement = conn.createStatement();
+			statement.executeUpdate(query);	
+			conn.close();
+		}catch(Exception e) {
+			System.out.println("INSERT FAILED" + "\n\tconn = " + conn);
+			e.printStackTrace();
+		}
+	}
+	
+	public void viewExpensesTable() {
+		Connection conn = null;
+		
+		try {
+			String query = "select * from Expenses";
+			conn = getConnection();
+			Statement statement = conn.createStatement();
+			ResultSet rs = statement.executeQuery(query);
+			System.out.print("\nExpenses Table:  \n");
+			while(rs.next()){
+					System.out.print("\tprimary_key = " + rs.getString("primary_key") + "\t");
+					System.out.print("\tname  = " + rs.getString("name") + "\t");
+					System.out.print("\texpense = " + rs.getString("expense") + "\t");
+					System.out.print("\tdescription = " + rs.getString("description") + "\t");
+					System.out.print("\tdatePaid = " + rs.getString("datePaid") + "\t");
+					System.out.print("\tdateAcquired = " + rs.getString("dateAcquired") + "\t");
+					System.out.print("\n");
+	        }
+			conn.close();
+		}catch(Exception e) {
+			System.out.println("TABLE VIEW FAILED" + "\n\tconn = " + conn);
+			e.printStackTrace();
+		}
+	}
+	
+	public void insertIntoEarnings(String name, double expense, String description, String datePaid, String dateAcquired) {
+		Connection conn = null;
+		
+		try {
+			String query = "INSERT INTO Test(name , expense, description, datePaid, dateAcquired)" +
+					"  VALUES('" + name + "', '" + expense + "', '" + description + "', '" + datePaid + "', '" + dateAcquired + "')";
 			
 			conn = getConnection();
 			Statement statement = conn.createStatement();
 			statement.executeUpdate(query);
-			
-			query = "select * from Test WHERE type='"+ type +"' AND "
-					+ "name='" + name + "';";
-			ResultSet rs = statement.executeQuery(query);
-			while(rs.next())
-				System.out.println("The Row: " + rs.getInt("primary_key") + rs.getString("type") + rs.getString("name"));
-			
 			conn.close();
 		}catch(Exception e) {
-			System.out.println("CREATE TABLE FAILED" + "\n\tconn = " + conn);
+			System.out.println("INSERT INTO TABLE FAILED" + "\n\tconn = " + conn);
 			e.printStackTrace();
 		}
 	}
