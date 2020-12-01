@@ -1,5 +1,10 @@
 package application;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -108,12 +113,23 @@ public class SQLConnection {
 	
 	public void initExpenses() {
 		Connection conn = null;
-		//String name, int expense, String description, String datePaid, String dateAcquired
 		try {
-			String query = "CREATE TABLE IF NOT EXISTS Expenses(" +
-						"  primary_key INTEGER PRIMARY KEY," +
-						"  name VARCHAR(25) NOT NULL, expense REAL NOT NULL," +
-						"  description VARCHAR(25) NOT NULL, datePaid TEXT, dateAcquired TEXT);";
+			String query = getQuery("src\\application\\SQLQueries\\createExpensesTable.sql");
+			
+			conn = getConnection();
+			Statement statement = conn.createStatement();
+			statement.executeUpdate(query);
+			conn.close();
+		}catch(Exception e) {
+			System.out.println("CREATE TABLE FAILED" + "\n\tconn = " + conn);
+			e.printStackTrace();
+		}
+	}
+	
+	public void initEarnings() {
+		Connection conn = null;
+		try {
+			String query = getQuery("src\\application\\SQLQueries\\createEarningsTable.sql");
 			
 			conn = getConnection();
 			Statement statement = conn.createStatement();
@@ -129,8 +145,12 @@ public class SQLConnection {
 		Connection conn = null;
 		
 		try {
-			String query = "INSERT INTO Expenses(name , expense, description, datePaid, dateAcquired)" +
-					"  VALUES('" + name + "', '" + expense + "', '" + description + "', '" + datePaid + "', '" + dateAcquired + "')";
+			String query = getQuery("src\\application\\SQLQueries\\insertIntoExpenses.sql");
+			query = query.replace("$name", name);
+			query = query.replace("$expense", Double.toString(expense));
+			query = query.replace("$description", description);
+			query = query.replace("$datePaid", datePaid);
+			query = query.replace("$dateAcquired", dateAcquired);
 			
 			conn = getConnection();
 			Statement statement = conn.createStatement();
@@ -146,7 +166,8 @@ public class SQLConnection {
 		Connection conn = null;
 		
 		try {
-			String query = "select * from Expenses";
+			String query = getQuery("src\\application\\SQLQueries\\viewExpensesTable.sql");
+			
 			conn = getConnection();
 			Statement statement = conn.createStatement();
 			ResultSet rs = statement.executeQuery(query);
@@ -188,7 +209,7 @@ public class SQLConnection {
 		Connection conn = null;
 		
 		try {
-			String query = "DROP TABLE IF EXISTS Test;";
+			String query = getQuery("src\\application\\SQLQueries\\dropExpenses.sql");
 			conn = getConnection();
 			Statement statement = conn.createStatement();
 			statement.executeUpdate(query);
@@ -198,6 +219,33 @@ public class SQLConnection {
 			System.out.println("DROP TABLE(S) FAILED" + "\n\tconn = " + conn);
 			e.printStackTrace();
 		}
+	}
+	
+	public String getQuery(String filePath) {
+		String query = "";
+	    try{
+	        BufferedReader buffer = new BufferedReader(new FileReader(filePath));
+	        StringBuilder sb = new StringBuilder();
+	        String line = "";
+	        while((line = buffer.readLine()) != null) {
+	            sb.append(line);
+	        }
+	        query = sb.toString();
+	        buffer.close();
+	        
+	        
+	    }
+	    catch(FileNotFoundException e){
+	        e.printStackTrace();
+	        //Prints out file names at given point in directory
+//	        File file = new File(".");
+//	        for(String fileNames : file.list()) System.out.println(fileNames);
+	    }
+	    catch(IOException e){
+	        e.printStackTrace();
+	    }
+	    
+	    return query;
 	}
 
 }
