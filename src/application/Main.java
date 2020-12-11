@@ -21,6 +21,8 @@ public class Main extends Application {
 			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			primaryStage.setScene(scene);
 			
+			EmailReport.main();
+			
 			/*
 			 * Set up the view here
 			 * 
